@@ -10,13 +10,13 @@
     </div>
     <div @click="start" class="start_wrap" v-if="start_show"></div>
     <div class="process_wrap" v-show="process_show">
-      <div class="hand" @click="backHome">
+      <div class="hand" @click="clearProcess">
         <img src="@/assets/img/hand.png" />
         <span>按“向上”键返回</span>
       </div>
       <swiper class="swiper" :options="swiperOption" ref="swiper">
-         <swiper-slide v-for="(item,index) in list_all" :key="index" @click="portal">
-           <div class="swiper_item">
+         <swiper-slide v-for="(item,index) in list_all" :key="index">
+           <div class="swiper_item" @click="actionProcess(index)">
              <img :src="item.process_img" alt="" class="swiper_img"/>
            </div>
            <p class="text">{{item.process_text}}
@@ -30,7 +30,7 @@
     <div class="keyword_wrap" v-if="keyword_show">
       <img src="@/assets/img/keyword_title.png" class="title"/>
       <div class="keywords">
-        <div class="keyword_main" v-for="(item,index) in keywords_now" :key="index">
+        <div @click="actionKeyword" class="keyword_main" v-for="(item,index) in keywords_now" :key="index">
           <div class="keyword" :class="keyword_index==index ? 'active' : ''">
             <p>{{item.title}}</p>
           </div>
@@ -54,7 +54,7 @@
           <p class="detail">{{keyword_detail.text}}</p>
         </div>
       </div>
-      <img src="@/assets/img/back_active.png" alt="" class="back">
+      <img @click="clearVoice" src="@/assets/img/back_active.png" alt="" class="back">
     </div>
     </transition>
     <transition name="fade">
@@ -83,12 +83,12 @@
             <img src="@/assets/img/star_result_no.png" v-if="item==0"/> 
           </div>
         </div>
-        <img src="@/assets/img/retry.png" alt="" class="retry" v-if="!retry_show"/>
+        <img @click="clearEnd" src="@/assets/img/retry.png" alt="" class="retry" v-if="!retry_show"/>
         <img src="@/assets/img/retry_active.png" alt="" class="retry" v-if="retry_show"/>
       </div>
     </div>
     </transition>
-    <div class="interview_wrap" v-if="interview_show && default_show"></div>
+    <div @click="actionInterview" class="interview_wrap" v-if="interview_show && default_show"></div>
     <div class="video_wrap">
       <video src="https://ziyakeji.oss-cn-beijing.aliyuncs.com/100/video.mp4" 
         width="100%" 
@@ -111,10 +111,10 @@
           <img src="@/assets/img/star_no.png" v-if="item==0"/> 
         </div>
       </div>
-      <img src="@/assets/img/review_active.png" alt="" class="review" v-if="!loading && !start_show"/>
+      <img @click="actionVideo" src="@/assets/img/review_active.png" alt="" class="review" v-if="!loading && !start_show"/>
       <transition name="fade">
         <div class="interview_bg" v-show="interview_show">
-          <img src="@/assets/img/interview.gif" alt="" class="interview">
+          <img @click="actionInterview" src="@/assets/img/interview.gif" alt="" class="interview">
         </div>
       </transition>
     </div>
@@ -823,15 +823,20 @@ import QRCode from 'qrcodejs2'
         this.start_show=false;
         this.play();
       },
-      backHome() {
+      actionVideo() {
+        this.showProcess();
+        this.pause(); 
+      },
+      clearProcess() {
         this.process_show=false;
         this.play();
       },
-      portal() {
-        this.activeIndex=this.swiperItem.activeIndex;
-        this.videoEl.currentTime=this.list_all[this.activeIndex].time - 3;
-        this.play();
-        this.process_show=false
+      actionProcess(index) {
+        console.log(123123)
+            this.activeIndex=index;
+            this.videoEl.currentTime=this.list_all[this.activeIndex].time - 3;
+            this.play();
+            this.process_show=false
       },
       clearKeyword() {
         this.keyword_show=false;
@@ -842,6 +847,42 @@ import QRCode from 'qrcodejs2'
         this.audio_bg.pause();
         if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
         this.play();
+      },
+      actionKeyword() {
+        this.keyword_detail = this.list[this.interviewIndex-1]['keywords'][this.keyword_index];
+        this.keyword_show=false;
+        this.keyword_index=0;
+        setTimeout(()=>{
+          this.voice_show=true;
+        },300)
+        this.audio = document.getElementById('audio');
+        this.audio.src=this.keyword_detail.audio
+        this.audio.play();
+      },
+      clearVoice() {
+        this.audio.currentTime=0;
+        if(this.result_list[this.interviewIndex-1]==0){
+          this.result_list[this.interviewIndex-1]=1;
+          this.showStar();
+        }else{
+          this.hideAll();
+          this.audio_bg.currentTime=0;
+          this.audio_bg.pause();
+          this.audio.currentTime=0;
+          this.audio.pause()
+          if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
+          this.play();
+        }
+      },
+      clearEnd() {
+        this.reset();
+      },
+      actionInterview() {
+        clearTimeout(this.interviewTimer);
+        this.interview_show=false;
+        setTimeout(() => {
+          this.keyword_show=true;
+        }, 300);
       },
       play() {
         this.videoEl.play();
