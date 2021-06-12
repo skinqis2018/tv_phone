@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="keycode">{{keycode}}</div>
+    <!-- <div class="keycode">{{keycode}}</div> -->
     <!-- <div class="bg" v-if="loading || start_show"></div> -->
     <div class="loading" v-if="loading">
       <div class="loading_main">
@@ -12,7 +12,7 @@
     <div class="process_wrap" v-show="process_show">
       <div class="hand" @click="clearProcess">
         <img src="@/assets/img/hand.png" />
-        <span>按“向上”键返回</span>
+        <span>点我返回</span>
       </div>
       <swiper class="swiper" :options="swiperOption" ref="swiper">
          <swiper-slide v-for="(item,index) in list_all" :key="index">
@@ -91,8 +91,9 @@
     <div @click="actionInterview" class="interview_wrap" v-if="interview_show && default_show"></div>
     <div class="video_wrap">
       <video src="https://ziyakeji.oss-cn-beijing.aliyuncs.com/100/video.mp4" 
-        width="100%" 
-        height="100%"
+        
+    width="100vmax"
+    height="100vmin"
         x5-playsinline="true" 
         playsinline="true" 
         webkit-playsinline="true" 
@@ -114,7 +115,8 @@
       <img @click="actionVideo" src="@/assets/img/review_active.png" alt="" class="review" v-if="!loading && !start_show"/>
       <transition name="fade">
         <div class="interview_bg" v-show="interview_show">
-          <img @click="actionInterview" src="@/assets/img/interview.gif" alt="" class="interview">
+          <img src="@/assets/img/interview_light.png" class="interview bling">
+          <img @click="actionInterview" src="@/assets/img/interview_card.png" alt="" class="interview">
         </div>
       </transition>
     </div>
@@ -179,7 +181,6 @@ import QRCode from 'qrcodejs2'
           require('@/assets/img/start.png'),
           require('@/assets/img/back.png'),
           require('@/assets/img/back_active.png'),
-          require('@/assets/img/interview.gif'),
           require('@/assets/img/keyword_title.png'),
           require('@/assets/img/keyword.jpg'),
           require('@/assets/img/keyword0_0.jpg'),
@@ -606,141 +607,6 @@ import QRCode from 'qrcodejs2'
       }
       this.keywords_now = this.list[0].keywords;
       this.keyword_detail = this.keywords_now[0]
-      document.onkeydown = (event)=> {
-        var e = event || window.event || arguments.callee.caller.arguments[0];
-        let key = e.keyCode;
-        if (key == 8) { //返回
-          // this.audio.currentTime=0;
-          // this.audio.pause();
-          // if(this.process_show){
-          //   this.process_show=false;
-          //   this.play();
-          // }
-          // if(this.interview_show || this.keyword_show){
-          //   this.audio_bg.currentTime=0
-          //   this.audio_bg.pause();
-          //   if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
-          //   this.hideAll();
-          //   this.play();
-          // }
-        }
-        if (key == 13) { //确定
-          if(this.start_show){
-            this.start_show=false;
-            this.play();
-          }
-          if(this.process_show){
-            this.activeIndex=this.swiperItem.activeIndex;
-            this.videoEl.currentTime=this.list_all[this.activeIndex].time - 3;
-            this.play();
-            this.process_show=false
-          }
-          if(this.interview_show){
-            clearTimeout(this.interviewTimer);
-            this.interview_show=false;
-            setTimeout(() => {
-              this.keyword_show=true;
-            }, 300);
-          }
-          if(this.keyword_show && !this.back_show){
-            this.keyword_detail = this.list[this.interviewIndex-1]['keywords'][this.keyword_index];
-            this.keyword_show=false;
-            this.keyword_index=0;
-            setTimeout(()=>{
-              this.voice_show=true;
-            },300)
-            this.audio = document.getElementById('audio');
-            this.audio.src=this.keyword_detail.audio
-            this.audio.play();
-          }
-          if(this.keyword_show && this.back_show){
-            this.keyword_show=false;
-            this.default_show=false;
-            this.keyword_index=0;
-            this.back_show=false;
-            this.audio_bg.currentTime=0;
-            this.audio_bg.pause();
-            if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
-            this.play();
-          }
-          if(this.voice_show){
-            this.audio.currentTime=0;
-            if(this.result_list[this.interviewIndex-1]==0){
-              this.result_list[this.interviewIndex-1]=1;
-              this.showStar();
-            }else{
-              this.hideAll();
-              this.audio_bg.currentTime=0;
-              this.audio_bg.pause();
-              this.audio.currentTime=0;
-              this.audio.pause()
-              if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
-              this.play();
-            }
-          }
-          if(this.end_show && this.retry_show){
-            this.reset();
-          }
-        }
-        if(key==40){//向下
-          if(this.noDialog() && !this.start_show && !this.loading){
-            this.showProcess();
-            this.pause(); 
-          }
-          if(this.keyword_show){
-            this.back_show=true;
-            this.keyword_index=3;
-          }
-          if(this.voice_show){
-            this.voice_text.scrollTop+=200;
-          }
-          if(this.end_show){
-            this.retry_show=true;
-            this.endActiveIndex=-1;
-            this.slideEndTo(0);
-          }
-        }
-        if(key==38){//向上
-          if(this.process_show){
-            this.process_show=false;
-            this.play();
-          }
-          if(this.keyword_show){
-            this.back_show=false;
-            this.keyword_index=0;
-          }
-          if(this.voice_show){
-            this.voice_text.scrollTop-=200;
-          }
-          if(this.end_show){
-            this.retry_show=false;
-            this.endActiveIndex=0;
-            this.slideEndTo(0);
-          }
-        }
-        if(key==39){//向右
-          if(this.process_show){
-            this.slideNext();
-          }
-          if(this.keyword_show && this.keyword_index<2){
-            this.keyword_index++;
-          }
-          if(this.end_show){
-            this.slideEndNext();
-          }
-        }
-        if(key==37){//向左
-          if(this.process_show){
-            this.slidePrev();
-          }
-          if(this.keyword_show && this.keyword_index>0){
-            this.keyword_index--;
-          }
-          if(this.end_show){
-            this.slideEndPrev();
-          }
-        }
-      };
       
     },
     components: {
@@ -793,29 +659,24 @@ import QRCode from 'qrcodejs2'
             }
           }
         }, false);
-        this.audio.addEventListener("ended", ()=>{
-          console.log('audio ended')
-          this.voice_show=false;
-          this.default_show=false;
-          if(this.result_list[this.interviewIndex-1]==0){
-            this.result_list[this.interviewIndex-1]=1;
-            this.showStar();
-          }else{
-            this.hideAll();
-            this.audio_bg.currentTime=0;
-            this.audio_bg.pause();
-            this.audio.currentTime=0;
-            this.audio.pause()
-            if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
-            this.play();
-          }
-        }, false)
-        window.addEventListener("hashchange", e=>{
-          this.keycode = location.hash
-          if (window.location.hash !== '#home') return
-          this.process_show=false;
-          this.play();
-        }, false)
+        // this.audio.addEventListener("ended", ()=>{
+        //   console.log('audio ended')
+        //   this.voice_show=false;
+        //   this.default_show=false;
+        //   if(this.result_list[this.interviewIndex-1]==0){
+        //     this.result_list[this.interviewIndex-1]=1;
+        //     this.showStar();
+        //   }else{
+        //     this.hideAll();
+        //     this.audio_bg.currentTime=0;
+        //     this.audio_bg.pause();
+        //     this.audio.currentTime=0;
+        //     this.audio.pause()
+        //     if(this.activeIndex<this.list_all.length-1){this.activeIndex++;}
+        //     this.play();
+        //   }
+        // }, false)
+        
       })
     },
     methods: {
@@ -929,7 +790,6 @@ import QRCode from 'qrcodejs2'
         
       },
       showProcess(){
-        location.hash = "process"
         this.process_show=true;
         this.swiperItem=this.$refs.swiper.swiper;
         this.$nextTick(()=>{
@@ -991,6 +851,14 @@ import QRCode from 'qrcodejs2'
     from{-webkit-transform:rotate(0deg);}
     to{-webkit-transform:rotate(360deg);}
   }
+  @keyframes bling {
+    0%{opacity: 1;}
+    50%{opacity: 0;}
+    100%{opacity: 1;}
+  }
+  .bling {
+    animation:bling 2s linear infinite;  
+  }
   .fade-enter{
     opacity: 0;
   }
@@ -998,8 +866,8 @@ import QRCode from 'qrcodejs2'
     transition: opacity 0.2s;
   }
   .wrap{
-    width:100%;
-    height:100%;
+        width : 100vmax;
+        height : 100vmin;
     position:relative;
     display:flex;
     justify-content: center;
@@ -1010,13 +878,15 @@ import QRCode from 'qrcodejs2'
       padding: 0;
       line-height: 0;
       >video{
-        width:100vw;
+        width : 100vmax;
+        height : 100vmin;
       }
       .interview{
         position:absolute;
         z-index: 2;
-        top:2.4rem;
-        left:3rem;
+        top:35%;
+        left:32%;
+        transform: translate(-50%, -50%);
         width:4.8rem;
         height:3.85rem;
       }
@@ -1099,6 +969,11 @@ import QRCode from 'qrcodejs2'
     }
   }
   .interview_bg{
+    position:absolute;
+    background:rgba(0,0,0,0.5);
+    width:100%;
+    height:100%;
+    color:#fff;
     z-index: 6;
     top:0;
     left:0;
@@ -1192,7 +1067,7 @@ import QRCode from 'qrcodejs2'
     .title{
       display:block;
       height:0.82rem;
-      margin:1.7rem auto 0.76rem; 
+      margin: .4rem auto;
     }
     .keywords{
       width:100%;
@@ -1242,7 +1117,7 @@ import QRCode from 'qrcodejs2'
   .voice_wrap{
     .title{
       font-size:0.72rem;
-      margin:0.9rem 0 0.36rem;
+      margin:0.4rem auto;
       height:0.72rem;
       display:flex;
       align-items: center;
@@ -1338,15 +1213,15 @@ import QRCode from 'qrcodejs2'
     background:rgba(0,0,0,0.9);
     .title{
       font-size:0.4rem;
-      margin:0.84rem 0 0.2rem;
-      display:flex;
+      margin: auto;
       height:0.6rem;
-      align-items: center;
+      line-height: .6rem;
       color:#fff;
+      text-align: center;
     }
     .img_wrap{
       width:100%;
-      height:6rem;
+      height:4rem;
       padding-right: 1rem;
       box-sizing: border-box;
       position:relative;
@@ -1356,7 +1231,7 @@ import QRCode from 'qrcodejs2'
       outline: none;
       .swiper{
         width:100%;
-        height:6rem;
+        height:4rem;
         position:absolute;
         left:0;
         display:flex;
@@ -1374,8 +1249,8 @@ import QRCode from 'qrcodejs2'
         justify-content: flex-end;
       }
       .swiper_item{
-        width:3.6rem;
-        height:6rem;
+        width:2.6rem;
+        height:4rem;
         display:flex;
         align-items: center;
         justify-content: center;
